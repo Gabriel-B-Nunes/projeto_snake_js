@@ -1,49 +1,82 @@
-/*nessa parte, estamos definindo variáveis baseadas no arquivo html*/
 let canvas = document.getElementById("snake");
-let context = canvas.getContext("2d"); /*context renderiza o jogo no canvas*/
-let box = 32; /*diz quantos pixels terá cada quadrado do jogo*/
-let snake = []
-
-snake[0] = { /*estamos preenchendo o array*/
-    x: 8 * box,
-    y: 8 * box
+let context = canvas.getContext("2d");
+let box = 32;
+let snake = [];
+snake[0] = {
+        x: 8 * box,
+        y: 8 * box
 }
-
 let direction = "right";
-
-function criarBG(){ /*essa função irá desenhar o canvas*/
-    context.fillStyle = "lightgreen"; /*define a cor*/
-    context.fillRect(0, 0, 16 * box, 16 * box); /*define o tamanho do canvas*/
+let food = {
+    x: Math.floor(Math.random() * 15 + 1) * box,
+    y: Math.floor(Math.random() * 15 + 1) * box
 }
 
-/*essa função irá desenhar a cobrinha*/
-function criarCobra(){
-    for(i = 0; i < snake.length; i++){
-        context.fillRect = "green";
-        context.fillRect(snake[i].x, snake[i].y, box, box); /*define o tamanho baseado no array*/
+function criarBG() {
+    context.fillStyle = "lightgreen";
+    context.fillRect(0, 0, 16 * box, 16 * box);
+}
+
+function criarCobrinha() {
+    for(i=0; i < snake.length; i++){
+        context.fillStyle = "green";
+        context.fillRect(snake[i].x, snake[i].y, box, box);
     }
 }
 
-function iniciarJogo(){
-    criarBG();
-    criarCobra();
+function drawFood(){
+    context.fillStyle = "red";
+    context.fillRect(food.x, food.y, box, box);
+}
 
-    let snakeX = snake[0].x; /*estamos referenciando a posição inicial baseada no array*/
+document.addEventListener('keydown', update);
+
+function update (event){
+    if(event.keyCode == 37 && direction != "right") direction = "left";
+    if(event.keyCode == 38 && direction != "down") direction = "up";
+    if(event.keyCode == 39 && direction != "left") direction = "right";
+    if(event.keyCode == 40 && direction != "up") direction = "down";
+}
+
+function iniciarJogo(){
+    if(snake[0].x > 15 * box && direction == "right") snake[0].x = 0;
+    if(snake[0].x < 0 && direction == "left") snake[0].x = 16 * box;
+    if(snake[0].y > 15 * box && direction == "down") snake[0].y = 0;
+    if(snake[0].y < 0 && direction == "up") snake[0].y = 16 * box;
+
+    for(i = 1; i < snake.length; i++){
+        if(snake[0].x == snake[i].x && snake[0].y == snake[i].y){
+            clearInterval(jogo);
+            alert('Game Over! ):')
+        }
+    }
+
+    criarBG();
+    criarCobrinha();
+    drawFood();
+
+    let snakeX = snake[0].x;
     let snakeY = snake[0].y;
 
-    if(direction == "right") snakeX += box; /*movimento eixo x*/
+    if(direction == "right") snakeX += box;
     if(direction == "left") snakeX -= box;
-    if(direction == "up") snakeY -= box; /*movimento eixo y*/
+    if(direction == "up") snakeY -= box;
     if(direction == "down") snakeY += box;
 
-    snake.pop(); /*apaga o último quadrado da cobrinha*/
+    if(snakeX != food.x || snakeY != food.y){
+        snake.pop();
+    }
+    else{
+        food.x = Math.floor(Math.random() * 15 + 1) * box;
+        food.y = Math.floor(Math.random() * 15 + 1) * box;
+    }
 
-    let newHead = { /*variável geração da nova cabeça da cobrinha*/
+    let newHead = {
         x: snakeX,
         y: snakeY
     }
 
-    snake.unshift(newHead); /*unshift coloca o valor no primeiro slot do array*/
+    snake.unshift(newHead);
 }
 
-let jogo = setInterval(iniciarJogo, 100); /*faz com que a cada 100 milisegundos o jogo atualize*/
+let jogo = setInterval(iniciarJogo, 100);
